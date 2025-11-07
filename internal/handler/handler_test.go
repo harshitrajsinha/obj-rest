@@ -112,6 +112,7 @@ func (m MockStore) GetObjectByID(ctx context.Context, ID string) (models.ObjData
 // 	return nil, nil
 // }
 
+// TestGetAllObj tests GetAllObj handler
 func TestGetAllObj(t *testing.T) {
 	t.Run("without authentication", func(t *testing.T) {
 		var mockStore MockStore
