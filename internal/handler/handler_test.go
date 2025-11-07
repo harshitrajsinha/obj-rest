@@ -20,7 +20,8 @@ type MockStore struct {
 }
 
 // GetAllObjs returns a mock list of objects
-func (m MockStore) GetAllObjects(ctx context.Context) ([]models.ObjDataFromResponse, error) {
+func (m MockStore) GetAllObjects(_ context.Context) ([]models.ObjDataFromResponse, error) {
+
 	var objects []models.ObjDataFromResponse
 	var testObject models.ObjDataFromResponse = models.ObjDataFromResponse{
 		ID:   "123",
@@ -34,7 +35,7 @@ func (m MockStore) GetAllObjects(ctx context.Context) ([]models.ObjDataFromRespo
 }
 
 // GetObjsByIDs returns a mock list of objects based on requested ID
-func (m MockStore) GetObjectsByIDs(ctx context.Context, IDs ...string) ([]models.ObjDataFromResponse, error) {
+func (m MockStore) GetObjectsByIDs(_ context.Context, IDs ...string) ([]models.ObjDataFromResponse, error) {
 
 	var objects []models.ObjDataFromResponse
 	testObjectOne := models.ObjDataFromResponse{
@@ -78,7 +79,7 @@ func (m MockStore) GetObjectsByIDs(ctx context.Context, IDs ...string) ([]models
 }
 
 // GetObjByID returns a mock object based on requested ID
-func (m MockStore) GetObjectByID(ctx context.Context, ID string) (models.ObjDataFromResponse, error) {
+func (m MockStore) GetObjectByID(_ context.Context, ID string) (models.ObjDataFromResponse, error) {
 	testObjectOne := models.ObjDataFromResponse{
 		ID:   "1",
 		Name: "Test Object One",

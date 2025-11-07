@@ -72,7 +72,7 @@ func (s ObjectStore) GetAllObjects(ctx context.Context) ([]models.ObjDataFromRes
 	return objectsList, nil
 }
 
-// GetObjsByIDs fetches list of all objects based on different IDs input as query params
+// GetObjectsByIDs fetches list of all objects based on different IDs input as query params
 func (s ObjectStore) GetObjectsByIDs(ctx context.Context, IDs ...string) ([]models.ObjDataFromResponse, error) {
 
 	var str strings.Builder
@@ -123,7 +123,7 @@ func (s ObjectStore) GetObjectsByIDs(ctx context.Context, IDs ...string) ([]mode
 	return objectsList, nil
 }
 
-// GetObjByID fetches a single object based on param value
+// GetObjectByID fetches a single object based on param value
 func (s ObjectStore) GetObjectByID(ctx context.Context, ID string) (models.ObjDataFromResponse, error) {
 
 	var objectData models.ObjDataFromResponse
@@ -170,7 +170,7 @@ func (s ObjectStore) GetObjectByID(ctx context.Context, ID string) (models.ObjDa
 	return objectData, nil
 }
 
-// CreateNewObj sends a request to generate new object and add it to the list
+// CreateNewObject sends a request to generate new object and add it to the list
 func (s ObjectStore) CreateNewObject(ctx context.Context, objPayload models.ObjDataPayload) (models.NewObj, error) {
 
 	var objectData models.NewObj
@@ -223,7 +223,7 @@ func (s ObjectStore) CreateNewObject(ctx context.Context, objPayload models.ObjD
 	return objectData, nil
 }
 
-// UpdateObj updates all the fields of an object that has been created
+// UpdateObject updates all the fields of an object that has been created
 func (s ObjectStore) UpdateObject(ctx context.Context, objID string, objPayload models.ObjDataPayload) (models.NewObj, error) {
 
 	var objectData models.NewObj
@@ -276,7 +276,7 @@ func (s ObjectStore) UpdateObject(ctx context.Context, objID string, objPayload 
 	return objectData, nil
 }
 
-// UpdateObjPartially updates one or more fields of an object that has been created
+// UpdateObjectPartially updates one or more fields of an object that has been created
 func (s ObjectStore) UpdateObjectPartially(ctx context.Context, objID string, objPayload models.ObjDataPayload) (models.NewObj, error) {
 
 	var objectData models.NewObj
@@ -329,7 +329,7 @@ func (s ObjectStore) UpdateObjectPartially(ctx context.Context, objID string, ob
 	return objectData, nil
 }
 
-// DeleteObj deletes a created object
+// DeleteObject deletes a created object
 func (s ObjectStore) DeleteObject(ctx context.Context, objID string) (map[string]string, error) {
 
 	var response map[string]string
