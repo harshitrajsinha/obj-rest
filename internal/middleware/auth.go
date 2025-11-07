@@ -16,8 +16,8 @@ type contextKey string
 const UserRole contextKey = "role"
 
 // AuthMiddleware authenticate the user before accessing protected API routes
-func AuthMiddleware(next http.Handler, authSecretKey string) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func AuthMiddleware(next http.HandlerFunc, authSecretKey string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 
 		authToken := strings.TrimSpace(r.Header.Get("Authorization"))
 
@@ -50,7 +50,7 @@ func AuthMiddleware(next http.Handler, authSecretKey string) http.Handler {
 		log.Println("successfully authenticated")
 		next.ServeHTTP(w, r)
 
-	})
+	}
 
 }
 

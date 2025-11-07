@@ -2,3 +2,8 @@
 2025/11/04 05:16:48 main.go:60: starting server at port:  8089
 2025/11/04 05:16:50 logger.go:40: [ERROR] POST /login 405 0s
 2025/11/04 05:16:53 main.go:72: attempting to shutdown server gracefully
+2025/11/07 04:46:22 main.go:60: starting server at port:  8089
+2025/11/07 04:46:34 main.go:72: attempting to shutdown server gracefully
+2025/11/07 05:44:18 main.go:60: starting server at port:  8089
+2025/11/07 05:44:37 logger.go:40: [INFO] GET /login 201 0s
+2025/11/07 05:44:44 main.go:72: attempting to shutdown server gracefully
