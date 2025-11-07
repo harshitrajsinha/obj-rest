@@ -99,7 +99,7 @@ func (m MockStore) GetObjectByID(_ context.Context, ID string) (models.ObjDataFr
 }
 
 // GetObjByID returns a mock object based on requested ID
-func (m MockStore) CreateNewObject(ctx context.Context, payload models.ObjDataPayload) (models.NewObj, error) {
+func (m MockStore) CreateNewObject(_ context.Context, payload models.ObjDataPayload) (models.NewObj, error) {
 
 	newID, err := uuid.NewUUID()
 	if err != nil {
