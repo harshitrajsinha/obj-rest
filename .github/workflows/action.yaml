@@ -1,4 +1,4 @@
-name: Go GitHub Actions
+name: Obj Rest Workflow
 
 on:
   push:
