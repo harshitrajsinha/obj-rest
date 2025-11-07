@@ -16,6 +16,6 @@ func RegisterV1Routes(mux *http.ServeMux, storeClient store.ObjectDataAccessor, 
 
 	objHandler := handler.NewObjHandler(storeClient)
 	mux.HandleFunc("POST /api/v1/objects", middleware.AuthMiddleware((objHandler.CreateNewObj), authSecretKey))
-	mux.Handle("GET /api/v1/objects", middleware.AuthMiddleware(http.HandlerFunc(objHandler.GetAllObj), authSecretKey))
+	mux.HandleFunc("GET /api/v1/objects", middleware.AuthMiddleware((objHandler.GetAllObj), authSecretKey))
 
 }

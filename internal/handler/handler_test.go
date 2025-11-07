@@ -4,14 +4,19 @@ package handler_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/harshitrajsinha/obj-rest/internal/handler"
 	"github.com/harshitrajsinha/obj-rest/internal/middleware"
 	"github.com/harshitrajsinha/obj-rest/internal/models"
 	"github.com/harshitrajsinha/obj-rest/internal/store"
+
+	"github.com/google/uuid"
 )
 
 // MockStore embeds and implements ObjectDataAccessor interface
@@ -26,7 +31,7 @@ func (m MockStore) GetAllObjects(_ context.Context) ([]models.ObjDataFromRespons
 	var testObject models.ObjDataFromResponse = models.ObjDataFromResponse{
 		ID:   "123",
 		Name: "Test Object",
-		Data: map[string]string{
+		Data: map[string]interface{}{
 			"Price": "519.99",
 		},
 	}
@@ -41,7 +46,7 @@ func (m MockStore) GetObjectsByIDs(_ context.Context, IDs ...string) ([]models.O
 	testObjectOne := models.ObjDataFromResponse{
 		ID:   "1",
 		Name: "Test Object One",
-		Data: map[string]string{
+		Data: map[string]interface{}{
 			"Price": "1",
 		},
 	}
@@ -49,7 +54,7 @@ func (m MockStore) GetObjectsByIDs(_ context.Context, IDs ...string) ([]models.O
 	testObjectTwo := models.ObjDataFromResponse{
 		ID:   "2",
 		Name: "Test Object Two",
-		Data: map[string]string{
+		Data: map[string]interface{}{
 			"Price": "2",
 		},
 	}
@@ -57,7 +62,7 @@ func (m MockStore) GetObjectsByIDs(_ context.Context, IDs ...string) ([]models.O
 	testObjectThree := models.ObjDataFromResponse{
 		ID:   "3",
 		Name: "Test Object Three",
-		Data: map[string]string{
+		Data: map[string]interface{}{
 			"Price": "3",
 		},
 	}
@@ -83,7 +88,7 @@ func (m MockStore) GetObjectByID(_ context.Context, ID string) (models.ObjDataFr
 	testObjectOne := models.ObjDataFromResponse{
 		ID:   "1",
 		Name: "Test Object One",
-		Data: map[string]string{
+		Data: map[string]interface{}{
 			"Price": "1",
 		},
 	}
@@ -93,10 +98,22 @@ func (m MockStore) GetObjectByID(_ context.Context, ID string) (models.ObjDataFr
 	return models.ObjDataFromResponse{}, nil
 }
 
-// // GetObjByID returns a mock object based on requested ID
-// func (m MockStore) CreateNewObject(ctx context.Context, payload models.ObjDataPayload) (models.NewObj, error) {
-// 	return models.NewObj{}, nil
-// }
+// GetObjByID returns a mock object based on requested ID
+func (m MockStore) CreateNewObject(ctx context.Context, payload models.ObjDataPayload) (models.NewObj, error) {
+
+	newID, err := uuid.NewUUID()
+	if err != nil {
+		return models.NewObj{}, errors.New("unable to create uuid for mock on POST /objects")
+	}
+
+	newObject := models.NewObj{
+		ID:        newID.String(),
+		Name:      payload.Name,
+		Data:      payload.Data,
+		CreatedAt: time.Now().UTC().GoString(),
+	}
+	return newObject, nil
+}
 
 // // GetObjByID returns a mock object based on requested ID
 // func (m MockStore) UpdateObject(ctx context.Context, objID string, payload models.ObjDataPayload) (models.NewObj, error) {
@@ -115,7 +132,7 @@ func (m MockStore) GetObjectByID(_ context.Context, ID string) (models.ObjDataFr
 
 // TestGetAllObj tests GetAllObj handler
 func TestGetAllObj(t *testing.T) {
-	t.Run("without authentication", func(t *testing.T) {
+	t.Run("unauthenticated access", func(t *testing.T) {
 		var mockStore MockStore
 
 		// create request
@@ -279,6 +296,204 @@ func TestGetAllObj(t *testing.T) {
 
 		if Name != "Test Object" {
 			t.Errorf("want object Name as Test Object, got %s", Name)
+		}
+	})
+}
+
+// TestCreateObj tests CreateObj handler
+func TestCreateObj(t *testing.T) {
+	t.Run("unauthenticated access", func(t *testing.T) {
+		var mockStore MockStore
+
+		objPayload := models.ObjDataPayload{
+			Name: "Apple MacBook Pro 16",
+			Data: map[string]interface{}{
+				"year":           2019,
+				"price":          1849.99,
+				"CPU model":      "Intel Core i9",
+				"Hard disk size": "1 TB",
+			},
+		}
+
+		payloadToSendInReq, _ := json.Marshal(objPayload)
+
+		// create request
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/objects", strings.NewReader(string(payloadToSendInReq)))
+
+		// create request recorder
+		rec := httptest.NewRecorder()
+
+		objHandlerForTest := handler.NewObjHandler(mockStore)
+		objHandlerForTest.CreateNewObj(rec, req)
+
+		// check status code
+		if rec.Result().StatusCode != http.StatusForbidden {
+			t.Errorf("expected status code 403, but got %d", rec.Result().StatusCode)
+		}
+
+		// check content-type header
+		if rec.Result().Header.Get("Content-Type") != "application/json" {
+			t.Errorf("expected Content-Type header `application/json`, but got %s", rec.Result().Header.Get("Content-Type"))
+		}
+
+		var testResponse map[string]interface{}
+		if err := json.NewDecoder(rec.Body).Decode(&testResponse); err != nil {
+			t.Fatalf("unexpected error occured %v", err)
+		}
+
+		message := testResponse["message"].(string)
+		if message != "Recognized but you are not allowed to perform this operation" {
+			t.Errorf("unexpected unauthorized message, got %s", message)
+		}
+	})
+
+	t.Run("wrong user role", func(t *testing.T) {
+		var mockStore MockStore
+
+		objPayload := models.ObjDataPayload{
+			Name: "Apple MacBook Pro 16",
+			Data: map[string]interface{}{
+				"year":           2019,
+				"price":          1849.99,
+				"CPU model":      "Intel Core i9",
+				"Hard disk size": "1 TB",
+			},
+		}
+
+		payloadToSendInReq, _ := json.Marshal(objPayload)
+
+		// create request
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/objects", strings.NewReader(string(payloadToSendInReq)))
+
+		ctxWithValue := context.WithValue(req.Context(), middleware.UserRole, "user")
+		req = req.WithContext(ctxWithValue)
+
+		// create request recorder
+		rec := httptest.NewRecorder()
+
+		objHandlerForTest := handler.NewObjHandler(mockStore)
+		objHandlerForTest.CreateNewObj(rec, req)
+
+		// check status code
+		if rec.Result().StatusCode != http.StatusForbidden {
+			t.Errorf("expected status code 403, but got %d", rec.Result().StatusCode)
+		}
+
+		// check content-type header
+		if rec.Result().Header.Get("Content-Type") != "application/json" {
+			t.Errorf("expected Content-Type header `application/json`, but got %s", rec.Result().Header.Get("Content-Type"))
+		}
+
+		var testResponse map[string]interface{}
+		if err := json.NewDecoder(rec.Body).Decode(&testResponse); err != nil {
+			t.Fatalf("unexpected error occured %v", err)
+		}
+
+		message := testResponse["message"].(string)
+		if message != "Recognized but you are not allowed to perform this operation" {
+			t.Errorf("unexpected unauthorized message, got %s", message)
+		}
+	})
+
+	t.Run("member access", func(t *testing.T) {
+		var mockStore MockStore
+
+		objPayload := models.ObjDataPayload{
+			Name: "Apple MacBook Pro 16",
+			Data: map[string]interface{}{
+				"year":           2019,
+				"price":          1849.99,
+				"CPU model":      "Intel Core i9",
+				"Hard disk size": "1 TB",
+			},
+		}
+
+		payloadToSendInReq, _ := json.Marshal(objPayload)
+
+		// create request
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/objects", strings.NewReader(string(payloadToSendInReq)))
+
+		ctxWithValue := context.WithValue(req.Context(), middleware.UserRole, "member")
+		req = req.WithContext(ctxWithValue)
+
+		// create request recorder
+		rec := httptest.NewRecorder()
+
+		objHandlerForTest := handler.NewObjHandler(mockStore)
+		objHandlerForTest.CreateNewObj(rec, req)
+
+		// check status code
+		if rec.Result().StatusCode != http.StatusForbidden {
+			t.Errorf("expected status code 403, but got %d", rec.Result().StatusCode)
+		}
+
+		// check content-type header
+		if rec.Result().Header.Get("Content-Type") != "application/json" {
+			t.Errorf("expected Content-Type header `application/json`, but got %s", rec.Result().Header.Get("Content-Type"))
+		}
+
+		var testResponse map[string]interface{}
+		if err := json.NewDecoder(rec.Body).Decode(&testResponse); err != nil {
+			t.Fatalf("unexpected error occured %v", err)
+		}
+
+		message := testResponse["message"].(string)
+		if message != "Recognized but you are not allowed to perform this operation" {
+			t.Errorf("unexpected unauthorized message, got %s", message)
+		}
+	})
+
+	t.Run("admin access", func(t *testing.T) {
+		var mockStore MockStore
+
+		objPayload := models.ObjDataPayload{
+			Name: "Apple MacBook Pro 16",
+			Data: map[string]interface{}{
+				"year":           2019,
+				"price":          1849.99,
+				"CPU model":      "Intel Core i9",
+				"Hard disk size": "1 TB",
+			},
+		}
+
+		payloadToSendInReq, _ := json.Marshal(objPayload)
+
+		// create request
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/objects", strings.NewReader(string(payloadToSendInReq)))
+
+		ctxWithValue := context.WithValue(req.Context(), middleware.UserRole, "admin")
+		req = req.WithContext(ctxWithValue)
+
+		// create request recorder
+		rec := httptest.NewRecorder()
+
+		objHandlerForTest := handler.NewObjHandler(mockStore)
+		objHandlerForTest.CreateNewObj(rec, req)
+
+		// check status code
+		if rec.Result().StatusCode != http.StatusOK {
+			t.Errorf("expected status code 200, but got - %d", rec.Result().StatusCode)
+		}
+
+		// check content-type header
+		if rec.Result().Header.Get("Content-Type") != "application/json" {
+			t.Errorf("expected Content-Type header `application/json`, but got %s", rec.Result().Header.Get("Content-Type"))
+		}
+
+		var testResponse map[string]interface{}
+		if err := json.NewDecoder(rec.Body).Decode(&testResponse); err != nil {
+			t.Fatalf("unexpected error occured %v", err)
+		}
+
+		message := testResponse["message"].(string)
+		if message != "Successfully created the object" {
+			t.Errorf("unexpected unauthorized message, got - %s", message)
+		}
+
+		data := testResponse["data"].(map[string]interface{})
+		name := data["name"].(string)
+		if name != "Apple MacBook Pro 16" {
+			t.Errorf("expected created object name `Apple MacBook Pro 16`, got - %s", name)
 		}
 	})
 }

@@ -29,7 +29,7 @@ func NewObjHandler(store store.ObjectDataAccessor) *ObjHandler {
 // CreateNewObj creates a new object and add to the reserved list of objects
 func (h *ObjHandler) CreateNewObj(w http.ResponseWriter, r *http.Request) {
 
-	role := r.Context().Value(middleware.UserRole).(string)
+	role := r.Context().Value(middleware.UserRole)
 	if role != "admin" {
 		if err := models.SendResponse(w, http.StatusForbidden, "Recognized but you are not allowed to perform this operation", nil); err != nil {
 			log.Println(err)
