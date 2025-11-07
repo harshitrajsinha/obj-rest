@@ -26,7 +26,7 @@ func NewStore(apiURL string) ObjectDataAccessor {
 	}
 }
 
-// GetAllObjs fetches all objects from the external API
+// GetAllObjects fetches all objects from the external API
 func (s ObjectStore) GetAllObjects(ctx context.Context) ([]models.ObjDataFromResponse, error) {
 
 	apiURL := s.APIURL + "/objects"
