@@ -50,6 +50,13 @@ func (h *ObjHandler) CreateNewObj(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
+	if payload.Name == "" {
+		if err := models.SendResponse(w, http.StatusBadRequest, "Could not create object, invalid payload provided", nil); err != nil {
+			log.Println(err)
+		}
+		return
+	}
+
 	// objPayload := models.ObjDataPayload{
 	// 	Name: "Apple MacBook Pro 16",
 	// 	Data: map[string]interface{}{
@@ -118,7 +125,7 @@ func (h *ObjHandler) GetObjByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	id := r.PathValue("id")
-	if id != "" {
+	if id == "" {
 		if err := models.SendResponse(w, http.StatusBadRequest, "object ID is missing", nil); err != nil {
 			log.Println(err)
 		}
@@ -141,11 +148,7 @@ func (h *ObjHandler) GetObjByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data := map[string]models.ObjDataFromResponse{
-		"data": objData,
-	}
-
-	if err := models.SendResponse(w, http.StatusOK, "Successfully retrieved object", data); err != nil {
+	if err := models.SendResponse(w, http.StatusOK, "Successfully retrieved object", objData); err != nil {
 		log.Println(err)
 	}
 
