@@ -51,11 +51,7 @@ func VerifyAuthToken(token string, authSecretKey string) (string, error) {
 	})
 
 	if err != nil {
-		if errors.Is(err, jwt.ErrTokenExpired) {
-			return "", errors.New("token expired")
-		} else {
-			return "", fmt.Errorf("%w", err)
-		}
+		return "", fmt.Errorf("%w", err)
 	}
 
 	if !parsedToken.Valid {
