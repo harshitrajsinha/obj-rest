@@ -17,9 +17,9 @@ type DataField struct {
 
 // ObjDataFromResponse represents strucutre of an object that will be received from response
 type ObjDataFromResponse struct {
-	ID   string                 `json:"id"`
-	Name string                 `json:"name"`
-	Data map[string]interface{} `json:"data,omitempty"`
+	ID   string            `json:"id"`
+	Name string            `json:"name"`
+	Data map[string]string `json:"data,omitempty"`
 }
 
 // ObjDataPayload represents strucutre of an object that will be send as a payload to create or update object

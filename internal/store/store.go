@@ -27,7 +27,7 @@ func NewStore(apiURL string) ObjectDataAccessor {
 }
 
 // GetAllObjs fetches all objects from the external API
-func (s *ObjectStore) GetAllObjs(ctx context.Context) ([]models.ObjDataFromResponse, error) {
+func (s ObjectStore) GetAllObjects(ctx context.Context) ([]models.ObjDataFromResponse, error) {
 
 	apiURL := s.APIURL + "/objects"
 
@@ -73,7 +73,7 @@ func (s *ObjectStore) GetAllObjs(ctx context.Context) ([]models.ObjDataFromRespo
 }
 
 // GetObjsByIDs fetches list of all objects based on different IDs input as query params
-func (s *ObjectStore) GetObjsByIDs(ctx context.Context, IDs ...string) ([]models.ObjDataFromResponse, error) {
+func (s ObjectStore) GetObjectsByIDs(ctx context.Context, IDs ...string) ([]models.ObjDataFromResponse, error) {
 
 	var str strings.Builder
 	str.WriteString("?")
@@ -124,7 +124,7 @@ func (s *ObjectStore) GetObjsByIDs(ctx context.Context, IDs ...string) ([]models
 }
 
 // GetObjByID fetches a single object based on param value
-func (s *ObjectStore) GetObjByID(ctx context.Context, ID string) (models.ObjDataFromResponse, error) {
+func (s ObjectStore) GetObjectByID(ctx context.Context, ID string) (models.ObjDataFromResponse, error) {
 
 	var objectData models.ObjDataFromResponse
 	apiURL := s.APIURL + "/objects/" + ID
@@ -171,7 +171,7 @@ func (s *ObjectStore) GetObjByID(ctx context.Context, ID string) (models.ObjData
 }
 
 // CreateNewObj sends a request to generate new object and add it to the list
-func (s *ObjectStore) CreateNewObj(ctx context.Context, objPayload models.ObjDataPayload) (models.NewObj, error) {
+func (s ObjectStore) CreateNewObject(ctx context.Context, objPayload models.ObjDataPayload) (models.NewObj, error) {
 
 	var objectData models.NewObj
 	apiURL := s.APIURL + "/objects"
@@ -224,7 +224,7 @@ func (s *ObjectStore) CreateNewObj(ctx context.Context, objPayload models.ObjDat
 }
 
 // UpdateObj updates all the fields of an object that has been created
-func (s *ObjectStore) UpdateObj(ctx context.Context, objID string, objPayload models.ObjDataPayload) (models.NewObj, error) {
+func (s ObjectStore) UpdateObject(ctx context.Context, objID string, objPayload models.ObjDataPayload) (models.NewObj, error) {
 
 	var objectData models.NewObj
 	apiURL := s.APIURL + "/objects/" + objID
@@ -277,7 +277,7 @@ func (s *ObjectStore) UpdateObj(ctx context.Context, objID string, objPayload mo
 }
 
 // UpdateObjPartially updates one or more fields of an object that has been created
-func (s *ObjectStore) UpdateObjPartially(ctx context.Context, objID string, objPayload models.ObjDataPayload) (models.NewObj, error) {
+func (s ObjectStore) UpdateObjectPartially(ctx context.Context, objID string, objPayload models.ObjDataPayload) (models.NewObj, error) {
 
 	var objectData models.NewObj
 	apiURL := s.APIURL + "/objects/" + objID
@@ -330,7 +330,7 @@ func (s *ObjectStore) UpdateObjPartially(ctx context.Context, objID string, objP
 }
 
 // DeleteObj deletes a created object
-func (s *ObjectStore) DeleteObj(ctx context.Context, objID string) (map[string]string, error) {
+func (s ObjectStore) DeleteObject(ctx context.Context, objID string) (map[string]string, error) {
 
 	var response map[string]string
 

@@ -60,7 +60,7 @@ func (h *ObjHandler) CreateNewObj(w http.ResponseWriter, r *http.Request) {
 	// 	},
 	// }
 
-	responseData, err := h.store.CreateNewObj(ctxWithTimeout, payload)
+	responseData, err := h.store.CreateNewObject(ctxWithTimeout, payload)
 	if err != nil {
 		log.Println(err)
 		if err := models.SendResponse(w, http.StatusInternalServerError, "error creating object, try again later", nil); err != nil {
@@ -92,7 +92,7 @@ func (h *ObjHandler) GetAllObj(w http.ResponseWriter, r *http.Request) {
 	ctxWithTimeout, cancel := context.WithTimeout(r.Context(), 8*time.Second)
 	defer cancel()
 
-	objsList, err := h.store.GetAllObjs(ctxWithTimeout)
+	objsList, err := h.store.GetAllObjects(ctxWithTimeout)
 	if err != nil {
 		log.Println(err)
 		return
@@ -127,7 +127,7 @@ func (h *ObjHandler) GetObjByID(w http.ResponseWriter, r *http.Request) {
 
 	ctxWithTimeout, cancel := context.WithTimeout(r.Context(), 8*time.Second)
 	defer cancel()
-	objData, err := h.store.GetObjByID(ctxWithTimeout, id)
+	objData, err := h.store.GetObjectByID(ctxWithTimeout, id)
 	if err != nil {
 		if strings.Contains(err.Error(), "error - no data retrieved in response") {
 			if err := models.SendResponse(w, http.StatusBadRequest, "Object with given ID not available", nil); err != nil {
